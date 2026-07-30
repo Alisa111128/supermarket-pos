@@ -1,5 +1,5 @@
 // Service Worker - 离线缓存
-var CACHE = 'supermarket-v4';
+var CACHE = 'supermarket-v5';
 var ASSETS = [
   './',
   './index.html',
@@ -25,11 +25,17 @@ self.addEventListener('activate', function (e) {
   );
 });
 
+// 网络优先策略：有网就用最新版，没网才用缓存
 self.addEventListener('fetch', function (e) {
   e.respondWith(
-    caches.match(e.request).then(function (r) {
-      return r || fetch(e.request).catch(function () {
-        if (e.request.mode === 'navigate') return caches.match('./index.html');
+    fetch(e.request).then(function (res) {
+      // 成功时更新缓存
+      var clone = res.clone();
+      caches.open(CACHE).then(function (c) { c.put(e.request, clone); });
+      return res;
+    }).catch(function () {
+      return caches.match(e.request).then(function (r) {
+        return r || (e.request.mode === 'navigate' ? caches.match('./index.html') : undefined);
       });
     })
   );
