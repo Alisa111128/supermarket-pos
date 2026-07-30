@@ -268,7 +268,7 @@ $('#modal-overlay').addEventListener('click', function (e) {
 function init() {
   // 注册 Service Worker
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(function () {});
+    navigator.serviceWorker.register('./sw.js').catch(function () {});
   }
 
   // 首次加载数据
