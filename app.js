@@ -1,6 +1,26 @@
 /**
  * 小超市扫码收银系统 - 纯前端版（localStorage）
+ * 版本: 5
  */
+var APP_VERSION = 5;
+// 检查是否运行旧版本
+if (localStorage.getItem('app_version') && parseInt(localStorage.getItem('app_version')) < APP_VERSION) {
+  setTimeout(function () {
+    if (confirm('发现新版本，是否立即更新？')) {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function (regs) {
+          regs.forEach(function (r) { r.unregister(); });
+        }).then(function () {
+          window.location.reload(true);
+        });
+      } else {
+        window.location.reload(true);
+      }
+    }
+  }, 500);
+}
+localStorage.setItem('app_version', APP_VERSION);
+
 var DEFAULT_DATA = {
   products: [
     { id: 'p1', barcode: '6901234567890', name: '康师傅红烧牛肉面', category: '方便食品', price: 4.50, cost: 3.20, stock: 48, unit: '袋', lowStock: 10, updatedAt: '' },
