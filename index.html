@@ -6,29 +6,25 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#1677ff">
-  <title>小超市扫码查价</title>
+  <title>小超市扫码收银</title>
   <link rel="manifest" href="./manifest.json">
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 <div id="app">
-  <!-- 顶部栏 -->
   <header class="topbar">
-    <div class="topbar-title" id="topbar-title">扫码查价</div>
+    <div class="topbar-title" id="topbar-title">扫码收银</div>
     <div class="topbar-actions">
-      <button class="btn-icon" id="btn-search-toggle" title="搜索">🔍</button>
       <button class="btn-icon" id="btn-settings" title="设置">⚙️</button>
     </div>
   </header>
 
-  <!-- 主内容 -->
   <main class="main" id="main-content"></main>
 
-  <!-- 底部导航 -->
   <nav class="bottom-nav">
-    <div class="bn-item active" data-view="scan">
-      <span class="bn-icon">📷</span>
-      <span class="bn-label">扫码</span>
+    <div class="bn-item active" data-view="pos">
+      <span class="bn-icon">🛒</span>
+      <span class="bn-label">收银</span>
     </div>
     <div class="bn-item" data-view="products">
       <span class="bn-icon">📦</span>
@@ -38,22 +34,23 @@
       <span class="bn-icon">📊</span>
       <span class="bn-label">库存</span>
     </div>
-    <div class="bn-item" data-view="history">
+    <div class="bn-item" data-view="records">
       <span class="bn-icon">📋</span>
       <span class="bn-label">记录</span>
+    </div>
+    <div class="bn-item" data-view="stats">
+      <span class="bn-icon">📈</span>
+      <span class="bn-label">统计</span>
     </div>
   </nav>
 </div>
 
-<!-- 模态框 -->
 <div class="modal-overlay" id="modal-overlay" style="display:none">
   <div class="modal-box" id="modal-box"></div>
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast" style="display:none"></div>
 
-<!-- html5-qrcode 扫码库（本地） -->
 <script src="./html5-qrcode.min.js"></script>
 <script src="./app.js"></script>
 </body>
