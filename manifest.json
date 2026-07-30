@@ -1,7 +1,7 @@
 {
-  "name": "小超市扫码查价",
-  "short_name": "扫码查价",
-  "description": "扫码查看商品价格和库存",
+  "name": "小超市扫码收银",
+  "short_name": "扫码收银",
+  "description": "扫码收银、查价、库存管理",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f5f5f5",
