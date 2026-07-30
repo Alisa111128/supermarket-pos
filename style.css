@@ -201,6 +201,25 @@ a { text-decoration: none; color: var(--primary); }
   font-size: 13px; padding: 4px 0;
 }
 
+/* ===== 选商品弹窗 ===== */
+.picker-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
+}
+.picker-card {
+  background: #fff; border: 1.5px solid var(--border);
+  border-radius: 10px; padding: 12px 10px; cursor: pointer;
+  transition: all 0.15s;
+}
+.picker-card:active { border-color: var(--primary); background: var(--primary-light); }
+.picker-card.soldout {
+  opacity: 0.5; cursor: not-allowed;
+}
+.picker-card.soldout:active { border-color: var(--border); background: #fff; }
+.pck-name { font-size: 14px; font-weight: 500; line-height: 1.3; margin-bottom: 6px; }
+.pck-price { font-size: 17px; font-weight: 700; color: var(--danger); margin-bottom: 2px; }
+.pck-stock { font-size: 11px; color: var(--text-light); }
+.picker-card.soldout .pck-price { color: var(--text-light); }
+
 /* ===== 商品列表 (不变) ===== */
 .product-search { display: flex; gap: 8px; margin-bottom: 12px; }
 .product-search input { flex: 1; }
