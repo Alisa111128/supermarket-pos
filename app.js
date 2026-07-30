@@ -243,13 +243,14 @@ function renderPos() {
   $('#main-content').innerHTML =
     '<div class="scan-area" id="scan-area"><div id="reader" style="width:100%"></div></div>' +
     '<div class="scan-hint">对准条形码自动识别，扫到即加入购物车</div>' +
-    '<div class="scan-manual" style="margin-bottom:8px"><input type="text" class="input" id="manual-barcode" placeholder="手动输入条码号" inputmode="numeric"><button class="btn btn-primary btn-sm" id="btn-manual-scan">添加</button></div>' +
+    '<div style="display:flex;gap:6px;margin-bottom:8px"><input type="text" class="input" id="manual-barcode" placeholder="手动输入条码号" inputmode="numeric" style="flex:1"><button class="btn btn-primary btn-sm" id="btn-manual-scan">添加</button><button class="btn btn-outline btn-sm" id="btn-pick-product" style="flex-shrink:0">📋 选商品</button></div>' +
     '<div class="cart-section" id="cart-section"></div>';
 
   $('#btn-manual-scan').addEventListener('click', function () {
     var code = $('#manual-barcode').value.trim();
     if (code) { queryBarcode(code); $('#manual-barcode').value = ''; }
   });
+  $('#btn-pick-product').addEventListener('click', function () { showProductPicker(); });
   $('#manual-barcode').addEventListener('keydown', function (e) {
     if (e.key === 'Enter') { var code = e.target.value.trim(); if (code) { queryBarcode(code); e.target.value = ''; } }
   });
@@ -318,6 +319,64 @@ function resumeCamera() {
     setTimeout(function () { if (state.scanner && state.scanner._resume) state.scanner._resume(); }, 1000);
   }
 }
+
+// ===== 手动选商品弹窗 =====
+function showProductPicker() {
+  loadProducts();
+  stopScanner();
+  state.cameraActive = false;
+  var pickerCat = '全部';
+  var pickerSearch = '';
+
+  function drawPicker() {
+    var filtered = state.products;
+    if (pickerSearch) { var s = pickerSearch.toLowerCase(); filtered = filtered.filter(function (p) { return p.name.toLowerCase().indexOf(s) !== -1 || p.barcode.indexOf(s) !== -1; }); }
+    if (pickerCat !== '全部') { filtered = filtered.filter(function (p) { return p.category === pickerCat; }); }
+    var allCats = ['全部'].concat(state.categories);
+    var catHtml = allCats.map(function (c) { return '<span class="cat-chip' + (c === pickerCat ? ' active' : '') + '" data-cat="' + c + '">' + c + '</span>'; }).join('');
+    var gridHtml = filtered.length === 0
+      ? '<div style="text-align:center;padding:40px;color:var(--text-light)">没有匹配的商品</div>'
+      : '<div class="picker-grid">' + filtered.map(function (p) {
+          var soldOut = p.stock <= 0;
+          return '<div class="picker-card' + (soldOut ? ' soldout' : '') + '" data-id="' + p.id + '"' + (soldOut ? '' : ' onclick="pickProduct(\'' + p.id + '\')"') + '>' +
+            '<div class="pck-name">' + p.name + '</div>' +
+            '<div class="pck-price">' + fmtMoney(p.price) + '</div>' +
+            '<div class="pck-stock">' + (soldOut ? '已售罄' : '库存 ' + p.stock) + '</div>' +
+            '</div>';
+        }).join('') + '</div>';
+    var bodyEl = $('#picker-body');
+    if (bodyEl) { bodyEl.innerHTML = '<div style="padding:0 8px"><input type="text" class="input" id="picker-search" placeholder="搜索商品名称或条码..." value="' + (pickerSearch || '') + '" style="margin-bottom:8px"><div class="category-bar" style="margin-bottom:12px">' + catHtml + '</div><div style="font-size:13px;color:var(--text-light);margin-bottom:8px">共 ' + filtered.length + ' 件 | 点击加入购物车</div>' + gridHtml + '</div>'; }
+    // 重新绑定事件
+    var si = document.getElementById('picker-search');
+    if (si) { si.addEventListener('input', function () { pickerSearch = this.value; drawPicker(); }); si.focus(); }
+    var chips = document.querySelectorAll('#picker-body .cat-chip');
+    chips.forEach(function (c) { c.addEventListener('click', function () { pickerCat = c.dataset.cat; drawPicker(); }); });
+  }
+
+  var body = '<div id="picker-body" style="padding:0"></div>';
+  var footer = '<button class="btn btn-outline" onclick="closeModal();startScanner();">完成</button>';
+  showModal('选择商品', body, footer);
+  // 关闭弹窗时恢复扫码
+  $('#modal-overlay')._onClose = function () { startScanner(); };
+  drawPicker();
+}
+
+window.pickProduct = function (productId) {
+  var p = state.products.find(function (x) { return x.id === productId; });
+  if (!p) return;
+  if (p.stock <= 0) { toast('该商品已售罄', 'error'); return; }
+  addToCart(p);
+  toast(p.name + '  ' + fmtMoney(p.price) + '  x1', 'success');
+  // 刷新picker中的库存显示
+  loadProducts();
+  var card = document.querySelector('.picker-card[data-id="' + productId + '"]');
+  if (card) {
+    var updatedP = state.products.find(function (x) { return x.id === productId; });
+    if (updatedP && updatedP.stock <= 0) { card.classList.add('soldout'); card.removeAttribute('onclick'); }
+    var stockEl = card.querySelector('.pck-stock');
+    if (stockEl && updatedP) { stockEl.textContent = updatedP.stock <= 0 ? '已售罄' : '库存 ' + updatedP.stock; }
+  }
+};
 
 // ===== 购物车 =====
 function addToCart(product) {
